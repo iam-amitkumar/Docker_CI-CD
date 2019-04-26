@@ -1,0 +1,87 @@
+{% extends 'chat/index.html' %}
+{% block body %}
+<nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo">&emsp; Chat</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="">{{ request.user.username }}</a></li>
+          <li><a href="{% url 'logout' %}"><i class="material-icons">power_settings_new</i></a></li>
+      </ul>
+    </div>
+  </nav>
+<!--<nav class="blue lighten-3">-->
+    <!--<div class="nav-wrapper container">-->
+      <!--<a href="#" class="brand-logo">Chat</a>-->
+      <!--<ul id="nav-mobile" class="right hide-on-med-and-down">-->
+          <!--<li><a href="">{{ request.user.username }}</a></li>-->
+          <!--<li><a href="{% url 'logout' %}"><i class="material-icons">power_settings_new</i></a></li>-->
+      <!--</ul>-->
+    <!--</div>-->
+<!--</nav>-->
+    <div class="section" style="height: 80vh;background-image: url(https://lh3.googleusercontent.com/-Uwd8Cr-7C5g/WdIaWHqBnWI/AAAAAAAANmc/Mdv_tZIIRnIOR_zvAJJ0VuztB1Q9k50bwCHMYCw/s640/whatsapp.jpg);">
+    <div class="row" style="background-image: url(https://lh3.googleusercontent.com/-Uwd8Cr-7C5g/WdIaWHqBnWI/AAAAAAAANmc/Mdv_tZIIRnIOR_zvAJJ0VuztB1Q9k50bwCHMYCw/s640/whatsapp.jpg);">
+        <div class="col s3">
+        <div class="card">
+            <div id="users" class="collection">
+                
+            </div>
+        </div>
+        </div>
+        <div class="col s9">
+            <div class="card">
+            <div id="board" class="section grey lighten-3" style="height: 68vh; padding: 5px; overflow-y: scroll">
+                {% block messages %}
+
+                {% endblock %}
+            </div>
+            <form id="chat-box" class="form-group {% block hide %}hide{% endblock %}" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col s11">
+                        <div class="input-field" style=" height: 58px;">
+                            <input id="id_message" name="message" type="text" placeholder="Type your message..">
+                        </div>
+                    </div>
+                    <div class="col s1" style="line-height: 80px">
+                        <button class="btn btn-floating blue lighten-2 waves-effect waves-light"><i class="material-icons">send</i></button>
+                    </div>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+    </div>
+    <footer>
+        <div style="background-color: #e24d4f;height: 35px;margin-top: 35px;margin-bottom: 0px;"> <center style="padding-top: 7px; color:#FEFAFF;"><b>© 2019 Amit</b></center></div>
+     </footer>
+
+    {% load staticfiles %}
+    <script>
+        // For receiving
+        sender_id = "{{ receiver.id }}";
+        receiver_id = "{{ request.user.id }}";
+
+        //For sending
+        $(function () {
+            scrolltoend();
+            $('#chat-box').on('submit', function (event) {
+                event.preventDefault();
+                var message = $('#id_message');
+                send('{{ request.user.username }}', '{{ receiver.username }}', message.val());
+                message.val('');
+            })
+            setInterval(() => {
+                getUsers({{ request.user.id }}, doc => {
+                    let list = ''
+                    doc.map(userItem => {
+                        list += userItem
+                    })
+                    $('#users').html(list)
+                });
+            }, 1000)
+        })        
+
+
+
+    </script>
+{% endblock %}

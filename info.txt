@@ -1,6 +1,7 @@
 #!/bin/bash
 ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@172.31.10.86 "
-cd [Git Repo name]
+https://github.com/iam-amitkumar/Docker_CI-CD.git
+cd Docker_CI-CD
 sudo su -c '
 echo "Configuring Mysql Database"
 cd db

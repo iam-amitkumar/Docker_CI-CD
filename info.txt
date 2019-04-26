@@ -1,0 +1,46 @@
+#!/bin/bash
+ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@172.31.10.86 "
+cd [Git Repo name]
+sudo su -c '
+echo "Configuring Mysql Database"
+cd db
+docker build -t sql .
+docker run -d --name sql sql:latest
+echo "Configuring ChatApp"
+cd ..
+docker build -t chatapp .
+docker run -d -p 8000:8000 --link sql:sql --name chatapp chatapp
+echo "Configuring NGINX"
+docker pull nginx
+docker run -p 80:80 --link=chatapp -d --name mynginx nginx
+docker exec -it mynginx bash
+'
+cd /etc/nginx/conf.d/
+rm default.conf
+apt-get update
+apt install nano
+touch /etc/nginx/conf.d/chatapp.conf
+echo '
+upstream chatapp {
+  ip_hash;
+  server chatapp:8000;
+}
+
+
+# portal
+server {
+  location / {
+        proxy_pass http://chatapp/;
+    }
+  listen 80;
+  server_name 13.233.199.205;
+
+
+  location /staticfiles {
+    autoindex on;
+    alias /usr/src/chatapp/staticfiles;
+  }
+} > /etc/nginx/conf.d/chatapp.conf
+'
+sudo docker restart mynginx
+"

@@ -1,8 +1,25 @@
 #!/bin/bash
 ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@172.31.10.86 "
-https://github.com/iam-amitkumar/Docker_CI-CD.git
+sudo rm -rf /home/ubuntu/Docker_CI-CD/ChatApp
+"
+echo "copying latest directory of appplication from docker server started..."
+rsync -r /var/lib/jenkins/workspace/ChatApp ubuntu@172.31.10.86:/home/ubuntu/Docker_CI-CD/
+
+ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@172.31.10.86 "
 cd Docker_CI-CD
 sudo su -c '
+echo "Stopping and removing Container and Image of Mysql"
+docker stop sql
+docker rm sql
+docker rmi sql
+echo "Stopping and removing Container and Image of ChatApp"
+docker stop chatapp
+docker rm chatapp
+docker rmi chatapp
+echo "Stopping and removing Container and Image of Nginx"
+docker stop mynginx
+docker rm mynginx
+docker rmi iamamit/devoops:webserver-nginx
 echo "Configuring Mysql Database"
 cd db
 docker build -t sql .
@@ -12,36 +29,8 @@ cd ..
 docker build -t chatapp .
 docker run -d -p 8000:8000 --link sql:sql --name chatapp chatapp
 echo "Configuring NGINX"
-docker pull nginx
-docker run -p 80:80 --link=chatapp -d --name mynginx nginx
-docker exec -it mynginx bash
-'
-cd /etc/nginx/conf.d/
-rm default.conf
-apt-get update
-apt install nano
-touch /etc/nginx/conf.d/chatapp.conf
-echo '
-upstream chatapp {
-  ip_hash;
-  server chatapp:8000;
-}
-
-
-# portal
-server {
-  location / {
-        proxy_pass http://chatapp/;
-    }
-  listen 80;
-  server_name 13.233.199.205;
-
-
-  location /staticfiles {
-    autoindex on;
-    alias /usr/src/chatapp/staticfiles;
-  }
-} > /etc/nginx/conf.d/chatapp.conf
+docker pull iamamit/devoops:webserver-nginx
+docker run -p 80:80 --link=chatapp -d --name mynginx iamamit/devoops:webserver-nginx
 '
 sudo docker restart mynginx
 "

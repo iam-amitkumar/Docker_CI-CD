@@ -1,4 +1,4 @@
-Add the following lines to the "Exec Shell" in Job configuration in Jenkins dashboard:
+Add the following lines to the "Exec Shell" in Job configuration in Jenkins dashboard for CI-CD:
 
 #!/bin/bash
 ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@172.31.10.86 "
